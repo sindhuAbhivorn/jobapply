@@ -1,10 +1,8 @@
-from django.shortcuts import render
-
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .models import Applicant
 
-def apply_view(request):
+def apply(request):
     if request.method == 'POST':
         full_name = request.POST.get('full_name')
         gender = request.POST.get('gender')
@@ -25,7 +23,9 @@ def apply_view(request):
         resume = request.FILES.get('resume')
 
         # Validate required fields
-        if not all([full_name, gender, dob, email, phone, address, education, graduation_year, skills, experience, resume, job_role, relocate, referral_code]):
+        if not all([full_name, gender, dob, email, phone, address, education,
+                    graduation_year, skills, experience, resume, job_role,
+                    relocate, referral_code]):
             messages.error(request, "Please fill in all required fields.")
             return redirect('apply')
 

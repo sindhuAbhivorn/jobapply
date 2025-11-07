@@ -26,3 +26,17 @@ class Applicant(models.Model):
 
     def __str__(self):
         return self.full_name
+
+from django.db import models
+from django.utils import timezone
+import random
+
+class EmailOTP(models.Model):
+    email = models.EmailField(unique=True)
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def generate_otp(self):
+        self.otp = str(random.randint(100000, 999999))
+        self.created_at = timezone.now()
+        self.save()

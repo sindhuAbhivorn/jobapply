@@ -64,6 +64,75 @@ def apply(request):
 
     return render(request, 'jobapply.html')
 
+
+def error_404(request, exception):
+    return render(request, '404.html')
+
+
+from django.shortcuts import render, redirect
+from django.core.mail import send_mail
+from django.contrib import messages
+from django.utils import timezone
+from django.conf import settings
+from .models import EmailOTP
+import datetime
+import random
+
+def login_view(request):
+    if request.method == "POST":
+        email = request.POST.get('email')
+        if email:
+            otp_obj, created = EmailOTP.objects.get_or_create(email=email)
+            otp_obj.otp = str(random.randint(100000, 999999))
+            otp_obj.created_at = timezone.now()
+            otp_obj.save()
+
+            send_mail(
+                subject="Your Login OTP",
+                message=f"Your OTP is {otp_obj.otp}",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[email],
+            )
+            request.session['email'] = email
+            messages.success(request, "OTP sent to your email.")
+            return redirect('verify_otp')
+    return render(request, 'login.html')
+
+
+def verify_otp_view(request):
+    email = request.session.get('email')
+    if not email:
+        return redirect('login')
+    
+    if request.method == "POST":
+        otp_input = request.POST.get('otp')
+        try:
+            otp_obj = EmailOTP.objects.get(email=email)
+        except EmailOTP.DoesNotExist:
+            messages.error(request, "Invalid session.")
+            return redirect('login')
+        
+        # OTP valid for 5 minutes
+        if otp_obj.otp == otp_input and timezone.now() - otp_obj.created_at < datetime.timedelta(minutes=5):
+            messages.success(request, "OTP verified successfully.")
+            return redirect('admin_applicant_list')  # ✅ Goes to your admin.html page
+        else:
+            messages.error(request, "Invalid or expired OTP.")
+            return redirect('verify_otp')
+
+    return render(request, 'verify_otp.html')
+
+
 def admin_applicant_list(request):
+    email = request.session.get('email')
+    if not email:
+        return redirect('login')  # Only logged-in users can see admin page
+
     applicants = Applicant.objects.all().order_by('-submitted_at')
-    return render(request, 'admin.html', {'applicants': applicants})
+    return render(request, 'admin.html', {'applicants': applicants, 'email': email})
+
+
+def logout_view(request):
+    request.session.flush()
+    messages.success(request, "You have been logged out successfully.")
+    return redirect('login')

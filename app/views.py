@@ -65,5 +65,5 @@ def apply(request):
     return render(request, 'jobapply.html')
 
 def admin_applicant_list(request):
-    applicants = Applicant.objects.all()
+    applicants = Applicant.objects.all().order_by('-submitted_at')
     return render(request, 'admin.html', {'applicants': applicants})

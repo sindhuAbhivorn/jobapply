@@ -1,0 +1,61 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Applicants List - Admin Dashboard</title>
+    <link rel="stylesheet" href="{% static 'admin.css' %}">
+</head>
+<body>
+    <header>
+        <h1>Applicant Dashboard</h1>
+    </header>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Full Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Gender</th>
+                <th>DOB</th>
+                <th>Education</th>
+                <th>Experience</th>
+                <th>Job Role</th>
+                <th>Resume</th>
+                <th>Submitted At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for applicant in applicants %}
+            <tr>
+                <td>{{ applicant.full_name }}</td>
+                <td>{{ applicant.email }}</td>
+                <td>{{ applicant.phone }}</td>
+                <td>{{ applicant.gender }}</td>
+                <td>{{ applicant.dob }}</td>
+                <td>{{ applicant.education }}</td>
+                <td>{{ applicant.experience }} years</td>
+                <td>{{ applicant.job_role }}</td>
+                <td>
+                    {% if applicant.resume %}
+                    <a class="resume-link" href="{{ applicant.resume.url }}" target="_blank">View Resume</a>
+                    {% else %}
+                    No File
+                    {% endif %}
+                </td>
+                <td>{{ applicant.submitted_at|date:"Y-m-d H:i" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="10" style="text-align:center;">No applicants found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <footer>
+        &copy; {{ now|date:"Y" }} Job Portal Admin Panel
+    </footer>
+</body>
+</html>

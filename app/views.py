@@ -63,3 +63,7 @@ def apply(request):
         return redirect('apply')
 
     return render(request, 'jobapply.html')
+
+def admin_applicant_list(request):
+    applicants = Applicant.objects.all()
+    return render(request, 'admin.html', {'applicants': applicants})
